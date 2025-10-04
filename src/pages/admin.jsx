@@ -1,9 +1,10 @@
-import { useState } from "react";
+import React, { useState } from "react";
 
 export default function Admin() {
   const [titulo, setTitulo] = useState("");
   const [descricao, setDescricao] = useState("");
-  const [preco, setPreco] = useState("");
+  const [preco, setPreco] = useState(0);
+  const [empresaId, setEmpresaId] = useState("");
   const [midia, setMidia] = useState("");
 
   const criarCampanha = async () => {
@@ -11,22 +12,19 @@ export default function Admin() {
       const response = await fetch("http://localhost:4000/jobs", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ titulo, descricao, preco, midia }),
+        body: JSON.stringify({
+          titulo,
+          descricao,
+          preco,
+          empresa_id: empresaId,
+          midia,
+        }),
       });
 
-      if (!response.ok) {
-        throw new Error("Erro ao criar campanha");
-      }
-
+      if (!response.ok) throw new Error("Erro ao criar campanha");
       const data = await response.json();
       alert("✅ Campanha criada com sucesso!");
       console.log("Nova campanha:", data);
-
-      // limpar formulário
-      setTitulo("");
-      setDescricao("");
-      setPreco("");
-      setMidia("");
     } catch (err) {
       console.error(err);
       alert("❌ Erro ao criar campanha!");
@@ -62,7 +60,15 @@ export default function Admin() {
 
       <input
         type="text"
-        placeholder="URL do vídeo ou imagem"
+        placeholder="ID da Empresa"
+        value={empresaId}
+        onChange={(e) => setEmpresaId(e.target.value)}
+        className="border p-2 w-full mb-3 rounded"
+      />
+
+      <input
+        type="text"
+        placeholder="URL da Imagem ou Vídeo"
         value={midia}
         onChange={(e) => setMidia(e.target.value)}
         className="border p-2 w-full mb-3 rounded"
@@ -70,7 +76,7 @@ export default function Admin() {
 
       <button
         onClick={criarCampanha}
-        className="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700"
+        className="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700"
       >
         Criar Campanha
       </button>
