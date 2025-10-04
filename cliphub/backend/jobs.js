@@ -3,18 +3,7 @@ import { pool } from "./db.js";
 
 const router = express.Router();
 
-// Listar todos os jobs (campanhas)
-router.get("/", async (req, res) => {
-  try {
-    const result = await pool.query("SELECT * FROM jobs ORDER BY id DESC");
-    res.json(result.rows);
-  } catch (err) {
-    console.error(err);
-    res.status(500).json({ error: "Erro ao buscar jobs" });
-  }
-});
-
-// Criar job (campanha)
+// Criar campanha
 router.post("/", async (req, res) => {
   try {
     const { titulo, descricao, preco, midia } = req.body;
@@ -24,7 +13,7 @@ router.post("/", async (req, res) => {
     }
 
     const result = await pool.query(
-      `INSERT INTO jobs (titulo, descricao, preco, midia)
+      `INSERT INTO jobs (titulo, descricao, preco, midia) 
        VALUES ($1, $2, $3, $4) RETURNING *`,
       [titulo, descricao, preco || 0, midia || null]
     );
