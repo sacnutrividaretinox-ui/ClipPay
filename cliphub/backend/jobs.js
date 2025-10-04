@@ -17,12 +17,14 @@ router.get("/", async (req, res) => {
 // Criar job
 router.post("/", async (req, res) => {
   try {
-    const { titulo, descricao, preco, empresa_id, clipador_id, status } = req.body;
+    const { titulo, descricao, preco, midia } = req.body;
+
     const result = await pool.query(
-      `INSERT INTO jobs (titulo, descricao, preco, empresa_id, clipador_id, status)
-       VALUES ($1, $2, $3, $4, $5, $6) RETURNING *`,
-      [titulo, descricao, preco, empresa_id, clipador_id || null, status || "aberto"]
+      `INSERT INTO jobs (titulo, descricao, preco, empresa_id, clipador_id, midia)
+       VALUES ($1, $2, $3, 1, NULL, $4) RETURNING *`,
+      [titulo, descricao, preco, midia]
     );
+
     res.json(result.rows[0]);
   } catch (err) {
     console.error(err);

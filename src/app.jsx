@@ -1,105 +1,113 @@
 import { useState, useEffect } from "react";
 
-export default function App() {
+function App() {
   const [pagina, setPagina] = useState("dashboard");
   const [jobs, setJobs] = useState([]);
   const [titulo, setTitulo] = useState("");
   const [descricao, setDescricao] = useState("");
   const [preco, setPreco] = useState("");
+  const [midia, setMidia] = useState("");
 
-  // Carregar campanhas do backend
-  const carregarJobs = async () => {
+  // Buscar jobs do backend
+  async function carregarJobs() {
     try {
       const res = await fetch("http://localhost:4000/jobs");
       const data = await res.json();
       setJobs(data);
     } catch (err) {
-      console.error("Erro ao carregar jobs:", err);
+      console.error("Erro ao carregar jobs", err);
     }
-  };
+  }
 
   useEffect(() => {
-    if (pagina === "campanhas") carregarJobs();
-  }, [pagina]);
+    carregarJobs();
+  }, []);
 
-  // Criar nova campanha
-  const criarCampanha = async (e) => {
+  // Criar campanha
+  async function criarCampanha(e) {
     e.preventDefault();
     try {
-      const novaCampanha = {
-        titulo,
-        descricao,
-        preco,
-        empresa_id: 1, // por enquanto fixo
-        clipador_id: null,
-      };
-
       const res = await fetch("http://localhost:4000/jobs", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(novaCampanha),
+        body: JSON.stringify({ titulo, descricao, preco, midia }),
       });
-
       if (!res.ok) throw new Error("Erro ao criar campanha");
-
-      await carregarJobs();
+      alert("Campanha criada com sucesso!");
       setTitulo("");
       setDescricao("");
       setPreco("");
-      alert("Campanha criada com sucesso!");
+      setMidia("");
+      carregarJobs();
     } catch (err) {
-      console.error(err);
       alert("Erro ao criar campanha!");
     }
-  };
+  }
 
   return (
-    <div className="flex h-screen bg-gray-100">
+    <div className="flex h-screen">
       {/* Sidebar */}
-      <aside className="w-64 bg-white shadow-md">
-        <h1 className="text-2xl font-bold p-4">ClipHub</h1>
-        <nav className="flex flex-col">
-          <button
-            onClick={() => setPagina("dashboard")}
-            className="p-3 text-left hover:bg-gray-200"
-          >
-            Dashboard
-          </button>
-          <button
-            onClick={() => setPagina("campanhas")}
-            className="p-3 text-left hover:bg-gray-200"
-          >
-            Campanhas
-          </button>
-          <button
-            onClick={() => setPagina("financeiro")}
-            className="p-3 text-left hover:bg-gray-200"
-          >
-            Financeiro
-          </button>
+      <aside className="w-64 bg-gray-800 text-white p-4">
+        <h2 className="text-2xl font-bold mb-6">ClipHub</h2>
+        <nav>
+          <ul className="space-y-2">
+            <li>
+              <button
+                onClick={() => setPagina("dashboard")}
+                className="w-full text-left px-2 py-1 rounded hover:bg-gray-700"
+              >
+                Dashboard
+              </button>
+            </li>
+            <li>
+              <button
+                onClick={() => setPagina("campanhas")}
+                className="w-full text-left px-2 py-1 rounded hover:bg-gray-700"
+              >
+                Campanhas
+              </button>
+            </li>
+            <li>
+              <button
+                onClick={() => setPagina("financeiro")}
+                className="w-full text-left px-2 py-1 rounded hover:bg-gray-700"
+              >
+                Financeiro
+              </button>
+            </li>
+          </ul>
         </nav>
       </aside>
 
       {/* Conteúdo */}
-      <main className="flex-1 p-6 overflow-y-auto">
+      <main className="flex-1 p-6 bg-gray-100 overflow-y-auto">
         {pagina === "dashboard" && (
           <div>
-            <h2 className="text-2xl font-bold mb-6">Dashboard</h2>
-            <div className="grid grid-cols-4 gap-4">
+            <h1 className="text-2xl font-bold mb-6">Dashboard</h1>
+            <div className="grid grid-cols-4 gap-4 mb-6">
               <div className="bg-white p-4 rounded shadow">Saldo R$ 0</div>
-              <div className="bg-white p-4 rounded shadow">Campanhas 0</div>
-              <div className="bg-white p-4 rounded shadow">Clipes aprovados 0</div>
+              <div className="bg-white p-4 rounded shadow">
+                Campanhas {jobs.length}
+              </div>
+              <div className="bg-white p-4 rounded shadow">
+                Clipes aprovados 0
+              </div>
               <div className="bg-white p-4 rounded shadow">Gasto total R$ 0</div>
             </div>
+            <h2 className="text-xl font-semibold">Últimas movimentações</h2>
+            <p className="text-gray-600">Nenhuma movimentação recente</p>
           </div>
         )}
 
         {pagina === "campanhas" && (
           <div>
-            <h2 className="text-2xl font-bold mb-6">Campanhas</h2>
+            <h1 className="text-2xl font-bold mb-6">Campanhas</h1>
 
             {/* Formulário */}
-            <form onSubmit={criarCampanha} className="space-y-3 bg-white p-4 rounded shadow mb-6">
+            <form
+              onSubmit={criarCampanha}
+              className="space-y-3 bg-white p-4 rounded shadow mb-6"
+            >
               <input
                 type="text"
                 placeholder="Título"
@@ -120,52 +128,61 @@ export default function App() {
                 onChange={(e) => setPreco(e.target.value)}
                 className="border p-2 w-full rounded"
               />
-              <button type="submit" className="bg-indigo-600 text-white px-4 py-2 rounded">
+              <input
+                type="text"
+                placeholder="URL da imagem ou vídeo"
+                value={midia}
+                onChange={(e) => setMidia(e.target.value)}
+                className="border p-2 w-full rounded"
+              />
+              <button
+                type="submit"
+                className="bg-indigo-600 text-white px-4 py-2 rounded"
+              >
                 Criar Campanha
               </button>
             </form>
 
-            {/* Feed estilo Instagram */}
-            <div className="flex flex-col gap-6">
-              {jobs.length > 0 ? (
-                jobs.map((job) => (
-                  <div key={job.id} className="bg-white rounded shadow p-4">
-                    <div className="flex items-center gap-3 mb-3">
+            {/* Feed */}
+            <div className="space-y-6">
+              {jobs.map((job) => (
+                <div key={job.id} className="bg-white rounded shadow p-4">
+                  <h3 className="font-bold text-lg mb-2">{job.titulo}</h3>
+                  <p className="text-gray-600 mb-2">{job.descricao}</p>
+
+                  <div className="mb-3">
+                    {job.midia?.includes("youtube") ? (
+                      <iframe
+                        src={job.midia}
+                        title="video"
+                        className="w-full h-64 rounded"
+                        allowFullScreen
+                      ></iframe>
+                    ) : (
                       <img
-                        src={`https://ui-avatars.com/api/?name=${encodeURIComponent(
-                          job.titulo
-                        )}`}
-                        alt="avatar"
-                        className="w-10 h-10 rounded-full"
-                      />
-                      <span className="font-semibold">Empresa {job.empresa_id}</span>
-                    </div>
-                    <div className="mb-3">
-                      <img
-                        src="https://via.placeholder.com/600x300"
+                        src={job.midia || "https://via.placeholder.com/600x300"}
                         alt="preview"
-                        className="rounded"
+                        className="rounded w-full"
                       />
-                    </div>
-                    <p className="font-bold">{job.titulo}</p>
-                    <p className="text-gray-600">{job.descricao}</p>
-                    <p className="text-indigo-600 font-semibold">R$ {job.preco}</p>
+                    )}
                   </div>
-                ))
-              ) : (
-                <p>Nenhuma campanha criada ainda.</p>
-              )}
+
+                  <p className="text-sm font-semibold">Preço: R$ {job.preco}</p>
+                </div>
+              ))}
             </div>
           </div>
         )}
 
         {pagina === "financeiro" && (
           <div>
-            <h2 className="text-2xl font-bold">Financeiro</h2>
-            <p>Extrato e movimentações financeiras em breve...</p>
+            <h1 className="text-2xl font-bold mb-6">Financeiro</h1>
+            <p className="text-gray-600">Em breve...</p>
           </div>
         )}
       </main>
     </div>
   );
 }
+
+export default App;
