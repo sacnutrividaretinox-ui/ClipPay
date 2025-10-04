@@ -3,7 +3,7 @@ import { pool } from "./db.js";
 
 const router = express.Router();
 
-// Listar todos os jobs
+// Listar todos os jobs (campanhas)
 router.get("/", async (req, res) => {
   try {
     const result = await pool.query("SELECT * FROM jobs ORDER BY id DESC");
@@ -14,20 +14,24 @@ router.get("/", async (req, res) => {
   }
 });
 
-// Criar job
+// Criar job (campanha)
 router.post("/", async (req, res) => {
   try {
     const { titulo, descricao, preco, midia } = req.body;
 
+    if (!titulo || !descricao) {
+      return res.status(400).json({ error: "Título e descrição são obrigatórios" });
+    }
+
     const result = await pool.query(
-      `INSERT INTO jobs (titulo, descricao, preco, empresa_id, clipador_id, midia)
-       VALUES ($1, $2, $3, 1, NULL, $4) RETURNING *`,
-      [titulo, descricao, preco, midia]
+      `INSERT INTO jobs (titulo, descricao, preco, midia)
+       VALUES ($1, $2, $3, $4) RETURNING *`,
+      [titulo, descricao, preco || 0, midia || null]
     );
 
     res.json(result.rows[0]);
   } catch (err) {
-    console.error(err);
+    console.error("Erro ao criar job:", err);
     res.status(500).json({ error: "Erro ao criar job" });
   }
 });
