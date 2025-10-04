@@ -113,36 +113,63 @@ export default function App() {
         )}
 
         {pagina === "campanhas" && (
-          <>
-            <h2 className="text-2xl font-bold mb-6">Campanhas</h2>
-            <div className="bg-white p-4 rounded shadow">
-              {jobs.length > 0 ? (
-                <table className="w-full border">
-                  <thead className="bg-gray-100">
-                    <tr>
-                      <th className="text-left p-2 border">Título</th>
-                      <th className="text-left p-2 border">Descrição</th>
-                      <th className="text-left p-2 border">Preço</th>
-                      <th className="text-left p-2 border">Status</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {jobs.map((job) => (
-                      <tr key={job.id}>
-                        <td className="p-2 border">{job.titulo}</td>
-                        <td className="p-2 border">{job.descricao}</td>
-                        <td className="p-2 border">R$ {job.preco}</td>
-                        <td className="p-2 border">{job.status}</td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              ) : (
-                <p className="text-gray-500">Nenhuma campanha cadastrada</p>
-              )}
+  <>
+    <h2 className="text-2xl font-bold mb-6">Campanhas</h2>
+
+    <div className="flex flex-col gap-6">
+      {jobs.length > 0 ? (
+        jobs.map((job) => (
+          <div key={job.id} className="bg-white rounded shadow p-4">
+            {/* Cabeçalho com perfil */}
+            <div className="flex items-center gap-3 mb-3">
+              <img
+                src={`https://ui-avatars.com/api/?name=${encodeURIComponent(
+                  empresas.find((e) => e.id === job.empresa_id)?.nome || "Empresa"
+                )}&background=random`}
+                alt="Empresa"
+                className="w-10 h-10 rounded-full"
+              />
+              <div>
+                <p className="font-semibold text-sm">
+                  {empresas.find((e) => e.id === job.empresa_id)?.nome ||
+                    "Empresa"}
+                </p>
+                <p className="text-xs text-gray-500">
+                  usuário_{job.empresa_id}
+                </p>
+              </div>
             </div>
-          </>
-        )}
+
+            {/* Preview do conteúdo */}
+            {job.video_base ? (
+              <video
+                controls
+                className="w-full rounded mb-3"
+                src={job.video_base}
+              />
+            ) : (
+              <div className="w-full h-60 bg-gray-200 flex items-center justify-center rounded mb-3">
+                <span className="text-gray-500">Prévia da campanha</span>
+              </div>
+            )}
+
+            {/* Descrição */}
+            <p className="text-gray-800 text-sm">{job.descricao}</p>
+
+            {/* Footer (ações futuras) */}
+            <div className="flex items-center justify-between mt-3 text-sm text-gray-500">
+              <span>Status: {job.status}</span>
+              <span>💰 R$ {job.preco}</span>
+            </div>
+          </div>
+        ))
+      ) : (
+        <p className="text-gray-500">Nenhuma campanha cadastrada</p>
+      )}
+    </div>
+  </>
+)}
+
 
         {pagina === "financeiro" && (
           <>
